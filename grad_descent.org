@@ -1,0 +1,79 @@
+* Gradient Descent
+
+- This is a method for approximating functions
+- It uses small spets in the opposite direction to the gradient.
+- So, in order to do this, we need to be able to differentiate the function.
+- We'll give this a shot in ~R~. 
+
+#+BEGIN_SRC R :session
+where_number <- function(expr) {
+    pos <- grep("[0-9]+", x=expr)
+}
+
+where_variable <- function(expr) {
+    pos <- grep("[A-Za-z]", expr)
+}
+
+where_operator <- function(expr) {
+    pos <- grep("[+-^/]", expr)
+}
+##' Convert an unquoted expression to a vector of text
+##'
+##' Interestingly enough, R seems to add spaces around + and -, but not around exponentiation i.e. ^. I have no idea why this is. 
+##' @title expression_to_text
+##' @param expr an unquoted expression
+##' @return a vector of characters representing the expression
+##' @author richie
+expression_to_text <- function(expr) {
+    exprtext <- deparse(substitute(expr))
+    expression_vec <- unlist(strsplit(exprtext, ""))
+}
+
+deriv <- function(expr) {
+ #todo
+    
+}
+#+END_SRC
+
+So, above we handle the different kinds of values we can expect in our text. Right now, I only recognise addition, subtraction, multiplication, division and exponentiation. This is good enough for the time being (though clearly I'd want to at least be able to evaluate ~sin~ and ~cos~ at some point). 
+
+Next, I need to implement the rules of differentiation for these kinds of functions. 
+
+So all I really need is the exponentiation one, the variable one and the constant one. 
+
+#+BEGIN_SRC R :session
+diff_constant <- function(expr) {
+    res <-  0
+}
+diff_variable <- function(expr) {
+    
+}
+#+END_SRC
+
+So, I need to rethink my design. I need to split the function into powers, variables (x^1) and constants. 
+
+#+BEGIN_SRC R
+20x^2+30x+1
+#+END_SRC
+
+So, conceptually, that's three expressions, each handled by a different rule. 
+I feel like I could just handle the x to the power of 1 case along with the more general case. 
+
+So, the polynomial part is a transform of x^n -> nx^n-1
+
+#+BEGIN_SRC R :session  :results none
+diff_poly <- function(base, exp) {
+    newexp <- exp - 1
+    res <- paste0(exp, "*", base, "^", newexp)
+    }
+#+END_SRC
+
+So, the function above neatly returns a string with the result of the evaluated expression. 
+We cheated though, and just manipulated strings. We don't actually have strings of that form available, which is our next step. 
+
+
+
+
+This means that I should be representing every part of the expression in the form constant, varable and exponent. 
+So 
+
