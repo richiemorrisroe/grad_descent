@@ -83,20 +83,27 @@ The variables are kinda annoying.
 I think that I'll create a simple class to hold them
 
 #+BEGIN_SRC R :session :results none
-setClass("Expression", slots=list(coefficient="integer",
+setClass("Polynomial", slots=list(coefficient="integer",
                                            variable="character",
                                   exponent="integer"))
-
-to_expression <- function(string) {
-    var <- str_extract(string, "([A-Za-z]+)")
-    coeff <- str_extract(string, "([^0-9]+)[A-Za-z]")
+##' Convert a string to a polynomial
+##'
+##' Code assumes strings of the form 20x, 10^2 or 2xy^2
+##' @title to_polynomial
+##' @param string 
+##' @return a polynomial object
+##' @author richie
+to_polynomial <- function(string) {
+    var <- stringr::str_extract(string, "([A-Za-z]+)")
+    coeff <- stringr::str_extract(string, "([0-9]+)")
+    message("var is: ", var, "\n", "coeff is: ", coeff)
     if(grepl("\\^", x=string)) {
-        exp <- gsub("\\^([0-9]+)", x=string)
+        exp <- stringr::str_extract(string, "([0-9]+)$")
     }
     else {
         exp <- 0
     }
-    exp <- new("Expression", coefficient=as.integer(coeff),
+    exp <- new("Polynomial", coefficient=as.integer(coeff),
                variable=var,
                exponent=as.integer(exp))
 }
