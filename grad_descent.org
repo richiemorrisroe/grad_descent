@@ -35,6 +35,8 @@ deriv <- function(expr) {
 }
 #+END_SRC
 
+#+RESULTS:
+
 So, above we handle the different kinds of values we can expect in our text. Right now, I only recognise addition, subtraction, multiplication, division and exponentiation. This is good enough for the time being (though clearly I'd want to at least be able to evaluate ~sin~ and ~cos~ at some point). 
 
 Next, I need to implement the rules of differentiation for these kinds of functions. 
@@ -75,5 +77,30 @@ We cheated though, and just manipulated strings. We don't actually have strings 
 
 
 This means that I should be representing every part of the expression in the form constant, varable and exponent. 
-So 
+
+I think that I went too general with my early expression function, it seems much better to split on + and -
+The variables are kinda annoying.
+I think that I'll create a simple class to hold them
+
+#+BEGIN_SRC R :session :results none
+setClass("Expression", slots=list(coefficient="integer",
+                                           variable="character",
+                                  exponent="integer"))
+
+to_expression <- function(string) {
+    var <- str_extract(string, "([A-Za-z]+)")
+    coeff <- str_extract(string, "([^0-9]+)[A-Za-z]")
+    if(grepl("\\^", x=string)) {
+        exp <- gsub("\\^([0-9]+)", x=string)
+    }
+    else {
+        exp <- 0
+    }
+    exp <- new("Expression", coefficient=as.integer(coeff),
+               variable=var,
+               exponent=as.integer(exp))
+}
+#+END_SRC
+
+#+RESULTS:
 
