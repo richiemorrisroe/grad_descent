@@ -1,4 +1,15 @@
 
+##' Convert mathematical expression into its component parts
+##'
+##' Right now just splits on + and -
+##' @title expression_to_text
+##' @param string 
+##' @return a vector of characters representing an equation
+##' @author richie
+expression_to_text <- function(string) {
+    res <- stringr::str_split(string, "\\+|-")
+}
+
 setClass("Polynomial", slots=list(coefficient="integer",
                                            variable="character",
                                   exponent="integer"))

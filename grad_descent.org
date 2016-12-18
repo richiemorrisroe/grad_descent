@@ -3,11 +3,10 @@
 - This is a method for approximating functions
 - It uses small spets in the opposite direction to the gradient.
 - So, in order to do this, we need to be able to differentiate the function.
-- We'll give this a shot in ~R~. 
+- We'll give this a shot in ~R~.
+** Calculus
 
-
-
-#+BEGIN_SRC R :session 
+#+BEGIN_SRC R :session  :results none :exports none
 where_number <- function(expr) {
     pos <- grep("[0-9]+", x=expr)
 }
@@ -37,9 +36,24 @@ deriv <- function(expr) {
 }
 #+END_SRC
 
-#+RESULTS:
+
 
 So, above we handle the different kinds of values we can expect in our text. Right now, I only recognise addition, subtraction, multiplication, division and exponentiation. This is good enough for the time being (though clearly I'd want to at least be able to evaluate ~sin~ and ~cos~ at some point). 
+
+So this is needlessly complicated for something that didn't work. A better implementation is below. 
+
+#+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
+##' Convert mathematical expression into its component parts
+##'
+##' Right now just splits on + and -
+##' @title expression_to_text
+##' @param string 
+##' @return a vector of characters representing an equation
+##' @author richie
+expression_to_text <- function(string) {
+    res <- stringr::str_split(string, "\\+|-")
+}
+#+END_SRC
 
 Next, I need to implement the rules of differentiation for these kinds of functions. 
 
