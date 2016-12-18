@@ -5,7 +5,9 @@
 - So, in order to do this, we need to be able to differentiate the function.
 - We'll give this a shot in ~R~. 
 
-#+BEGIN_SRC R :session
+
+
+#+BEGIN_SRC R :session 
 where_number <- function(expr) {
     pos <- grep("[0-9]+", x=expr)
 }
@@ -63,7 +65,7 @@ I feel like I could just handle the x to the power of 1 case along with the more
 
 So, the polynomial part is a transform of x^n -> nx^n-1
 
-#+BEGIN_SRC R :session  :results none
+#+BEGIN_SRC R :session  :results none 
 diff_poly <- function(base, exp) {
     newexp <- exp - 1
     res <- paste0(exp, "*", base, "^", newexp)
@@ -82,7 +84,16 @@ I think that I went too general with my early expression function, it seems much
 The variables are kinda annoying.
 I think that I'll create a simple class to hold them
 
-#+BEGIN_SRC R :session :results none
+#+BEGIN_SRC R :session :results none :tangle polynomial/build_poly.R
+setwd('~/Dropbox/Code/Stats/polynomial/')
+devtools::setup(".", rstudio=FALSE)
+devtools::use_build_ignore("^#")
+devtools::use_testthat()
+devtools::document()
+#+END_SRC
+
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
 setClass("Polynomial", slots=list(coefficient="integer",
                                            variable="character",
                                   exponent="integer"))
@@ -109,5 +120,44 @@ to_polynomial <- function(string) {
 }
 #+END_SRC
 
-#+RESULTS:
+So we can just call eveything a polynomial and just implement a method for this kind of object right now. 
+
+#+BEGIN_SRC R :session :results none
+derive_polynomial <- function(polynomial) {
+    base <- polynomial@coefficient
+    exp <- polynomial@exponent
+    res <- diff_poly(base, exp)
+}
+setGeneric("differentiate", def=derive_polynomial)
+#+END_SRC
+
+So, the code works, but it produces weird looking expressions because it doesn't automatically simplify the expressions.
+
+That's presumably what we should do next. 
+
+I also need to be able to actually provide numerical results.
+
+Maybe give the differentiate function an argument to either be symbolic or not. I should just return the polynomial, and defer the printing done by the current function. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+diff_poly <- function(expression) {
+    res <- with(expression,
+                new("Polynomial", coefficient=exponent*coefficient,
+                    variable=variable,
+                    exponent = exponent-1))
+    
+}
+setGeneric("differentiate", def=diff_poly)
+#+END_SRC
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/provide.R
+  provide <- function(package) {
+      if(!require(package)) {install.packages(deparse(substitute(package)))}
+      else {
+          library(package)
+      }
+  }
+#+END_SRC
+
+
 
