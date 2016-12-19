@@ -85,3 +85,8 @@ setMethod("coef",
 coef_poly <- function(object, ...) {
     object@coefficient
 }
+
+polynomial_to_function <- function(polynomial) {
+    return(function(x) {
+        res <-   coef(polynomial)  * x ^(exponent(polynomial))
+    })}

@@ -285,6 +285,22 @@ coef_poly <- function(object, ...) {
 }
 #+END_SRC
 
+Everytime I write this boilerplate, I die a little. 
+*** Functions, more generally
+
+Let's re-write the polynomial_to_function a little more cleanly. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+polynomial_to_function <- function(polynomial) {
+    return(function(x) {
+        res <-   coef(polynomial)  * x ^(exponent(polynomial))
+    })}
+#+END_SRC
+
+We can now tangle this version into the package we've been building. 
+
+
+
 * Footnotes
 
 [fn:1] Of course. R's not a monster, you know
