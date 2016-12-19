@@ -105,7 +105,7 @@ devtools::use_build_ignore("^#")
 devtools::use_testthat()
 devtools::document()
 #+END_SRC
-
+*** Polynomials
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
 setClass("Polynomial", slots=list(coefficient="integer",
@@ -161,7 +161,11 @@ diff_poly <- function(expression) {
                     exponent = exponent-1))
     
 }
-setGeneric("differentiate", def=diff_poly)
+setGeneric("differentiate", function(object) {
+    standardGeneric("differentiate")
+})
+setMethod("differentiate", signature(object="Polynomial"),
+          definition=diff_poly)
 #+END_SRC
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/provide.R
@@ -172,6 +176,54 @@ setGeneric("differentiate", def=diff_poly)
       }
   }
 #+END_SRC
+So, next I need to represent an equation, which consists of one or more Polynomial objects. 
+*** Equation
 
+#+BEGIN_SRC R :session :results none
+setClass("Equation", representation = list(text="character", members="list"))
+as_equation <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    polylist <- sapply(textlist, to_polynomial)
+    eq <- new("Equation", text=string, members=polylist)
+    return(eq)
+}
+diff_equation <- function(eq) {
+    #todo
+}
+#+END_SRC
 
+So, the trouble with my equation class is that it loses the addition and subtraction operators. Not entirely sure how to handle this.
 
+There are some options: 
+- create operators which represent addition/subtraction
+- Add the information to the end of each polynomial. 
+
+Or I could just punt on it and hack together some gradient descent. 
+** Gradient Descent ()
+
+#+BEGIN_SRC R :session :results none
+gradient_descent <-
+    function(f, data, alpha=0.01, iterations) {
+        reslist <- vector(mode="list", length=iterations)
+        #this is magic
+        gradient <- differentiate(f)
+        for(i in seq_along(iterations)) {
+            message("iteration: ", i)
+            x <- x - alpha*gradient(x)
+            reslist[[i]] <- x
+        }
+        
+}
+#+END_SRC
+
+So, this looks nice. The only problem is that right now, my differentiate function isn't going to work. So, now I need to handle the stuff I said I'd ignore above. Note: code may or may not have been shamelessly copied from [[https://en.wikipedia.org/wiki/Gradient_descent#R][Wikipedia]]. 
+** Functions returning functions, oh my
+
+So, right now we have an equation object, which consists of a text string describing the function, and the constituent polynomials. We need to convert this into a function which can be applied to the input data (i.e. guess). 
+
+#+BEGIN_SRC R :session :results none
+equation_to_function <- function(equation) {
+    string <- equation@text
+    diff <- lapply(equation@members, differentiate)
+}
+#+END_SRC
