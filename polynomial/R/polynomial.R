@@ -42,4 +42,46 @@ diff_poly <- function(expression) {
                     exponent = exponent-1))
     
 }
-setGeneric("differentiate", def=diff_poly)
+setGeneric("differentiate", function(object) {
+    standardGeneric("differentiate")
+})
+setMethod("differentiate", signature(object="Polynomial"),
+          definition=diff_poly)
+
+setClass("Equation", representation = list(text="character", members="list"))
+as_equation <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    polylist <- sapply(textlist, to_polynomial)
+    eq <- new("Equation", text=string, members=polylist)
+    return(eq)
+}
+diff_equation <- function(eq) {
+    #todo
+}
+
+setGeneric("exponent", function(object) {
+    standardGeneric("exponent")
+})
+
+setGeneric("var", function(object) {
+    standardGeneric("var")
+})
+
+exponent <- function(obj) {
+    standardGeneric("exponent", fdef=exp_poly)
+}
+exp_poly <- function(polynomial) {
+    exp <- polynomial@exponent
+
+}
+var_poly <- function(polynomial) {
+    polynomial@var
+}
+
+setMethod("coef",
+    signature(object = "Polynomial"),
+    definition=coef_poly
+)
+coef_poly <- function(object, ...) {
+    object@coefficient
+}

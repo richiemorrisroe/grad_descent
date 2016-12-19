@@ -179,7 +179,7 @@ setMethod("differentiate", signature(object="Polynomial"),
 So, next I need to represent an equation, which consists of one or more Polynomial objects. 
 *** Equation
 
-#+BEGIN_SRC R :session :results none
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
 setClass("Equation", representation = list(text="character", members="list"))
 as_equation <- function(string) {
     textlist <- unlist(expression_to_text(string))
@@ -222,8 +222,69 @@ So, this looks nice. The only problem is that right now, my differentiate functi
 So, right now we have an equation object, which consists of a text string describing the function, and the constituent polynomials. We need to convert this into a function which can be applied to the input data (i.e. guess). 
 
 #+BEGIN_SRC R :session :results none
+polynomial_to_function <- function(polynomial) {
+    return(function(x) {
+        res <-   polynomial@coefficient  * x ^(polynomial@exponent)
+    })}
+#+END_SRC
+
+So, that was easier than expected. It's going to break unless I make some changes to my code though. I need to set the exponent value to 1, where it doesn't exist. Currently, I believe it will take zero, which will cause incorrect answers. 
+
+Let's make sure it doesn't work. 
+
+#+BEGIN_SRC R :session :results output
+poly_wrong <- to_polynomial("20x")
+wrong_func <- polynomial_to_function(poly_wrong)
+r <- wrong_func(1) #should be 20, will be zero
+print(r)
+#+END_SRC
+
+#+RESULTS:
+: var is: x
+: coeff is: 20
+: [1] 20
+
+Hmmm, it appears that I was incorrect. Weird. 
+
+#+BEGIN_SRC R :session :results none
 equation_to_function <- function(equation) {
     string <- equation@text
     diff <- lapply(equation@members, differentiate)
 }
 #+END_SRC
+
+
+So, I should write some utility methods. S4 is strict and everything, but you can completely ignore all of the validity checks just by using ~@~[fn:1]. Luckily, I would never do that, and hence why I'm writing some extractor functions. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+setGeneric("exponent", function(object) {
+    standardGeneric("exponent")
+})
+
+setGeneric("var", function(object) {
+    standardGeneric("var")
+})
+
+exponent <- function(obj) {
+    standardGeneric("exponent", fdef=exp_poly)
+}
+exp_poly <- function(polynomial) {
+    exp <- polynomial@exponent
+
+}
+var_poly <- function(polynomial) {
+    polynomial@var
+}
+
+setMethod("coef",
+    signature(object = "Polynomial"),
+    definition=coef_poly
+)
+coef_poly <- function(object, ...) {
+    object@coefficient
+}
+#+END_SRC
+
+* Footnotes
+
+[fn:1] Of course. R's not a monster, you know
