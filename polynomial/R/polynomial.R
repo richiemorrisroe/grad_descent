@@ -53,12 +53,12 @@ setGeneric("variable", function(object, ...) {
 })
 
 ##' @export
-exponent_expression <- function(expression) {
-    exp <- expression@exponent
+exponent_expression <- function(object, ...) {
+    exp <- object@exponent
 
 }
 ##' @export
-exponent <- function(obj, ...) {
+exponent <- function(object, ...) {
     standardGeneric("exponent", fdef=exponent_expression)
 }
 
@@ -78,7 +78,7 @@ setMethod("variable", signature(object="Expression"),
 coef_expression <- function(object, ...) {
     object@coefficient
 }
-##' A coefficient method for Polynomial objects
+##' A coefficient method for Expression objects
 ##'
 ##' As above
 ##' @export
@@ -116,31 +116,6 @@ setGeneric("differentiate", function(object, ...) {
 setMethod("differentiate", signature(object="Expression"),
           definition=diff_expression)
 
-##' An S4 class representing an Polynomial object
-##' @slot text a character object containing an equation
-##' @slot members a list of polynomial objects
-##'
-##' See above
-##' @export
-setClass("Polynomial", representation = list(text="character", members="list"))
-##' convert a string in polynomial form to an Polynomial object
-##'
-##' 
-##' @title as_polynomial
-##' @param string an equation of the form cx^n+/-cx^n.., c
-##' @return an equation object representing the 
-##' @author richie
-##' @export
-polynomial <- function(string) {
-    textlist <- unlist(expression_to_text(string))
-    polylist <- sapply(textlist, to_expression)
-    eq <- methods::new("Equation", text=string, members=polylist)
-    return(eq)
-}
-diff_polynomial <- function(eq) {
-    #todo
-}
-
 ##' convert an expression object to a function over the variable(s)
 ##'
 ##' Right now only works for one variable functions
@@ -153,3 +128,26 @@ expression_to_function <- function(expression) {
     return(function(x) {
         res <-   coef(expression)  * x ^(exponent(expression))
     })}
+
+##' An S4 class representing an Polynomial object
+##' @slot text a character object containing an equation
+##' @slot members a list of polynomial objects
+##'@slot operators a vector of additions/subtractions
+##' See above
+##' @export
+setClass("Polynomial", representation = list(text="character", members="list", operators="character"))
+
+##' convert a string in polynomial form to an Equation object
+##'
+##' I really need to rename some of this stuff
+##' @title as_polynomial
+##' @param string an equation of the form cx^n+/-cx^n.., c
+##' @return an equation object representing the 
+##' @author richie
+##' @export
+as_polynomial <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    polylist <- sapply(textlist, to_expression)
+    eq <- methods::new("Polynomial", text=string, members=polylist, )
+    return(eq)
+}

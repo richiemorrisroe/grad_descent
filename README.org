@@ -267,7 +267,7 @@ This is just a utility that I often need. It generates warnings if put in a pack
 So, next I need to represent an equation, which consists of one or more Polynomial objects. 
 *** Equation
 
-#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+#+BEGIN_SRC R :session :results none :tangle no
 ##' An S4 class representing an Polynomial object
 ##' @slot text a character object containing an equation
 ##' @slot members a list of polynomial objects
@@ -275,6 +275,10 @@ So, next I need to represent an equation, which consists of one or more Polynomi
 ##' See above
 ##' @export
 setClass("Polynomial", representation = list(text="character", members="list"))
+#+END_SRC
+
+#+BEGIN_SRC R :session :results none :tangle no
+
 ##' convert a string in polynomial form to an Equation object
 ##'
 ##' I really need to rename some of this stuff
@@ -286,7 +290,7 @@ setClass("Polynomial", representation = list(text="character", members="list"))
 as_polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
     polylist <- sapply(textlist, to_expression)
-    eq <- methods::new("Equation", text=string, members=polylist)
+    eq <- methods::new("Polynomial", text=string, members=polylist, )
     return(eq)
 }
 diff_polynomial <- function(eq) {
@@ -416,6 +420,36 @@ print(getClass ("Polynomial"))
 : Class: character      list
 
 What it needs is a third component, operators which contain a vector of addition/subtraction operators. These can then be used to recombine the elements (for printing), or to arrange the functions so that we can finally finish our gradient descent. 
+
+*** Polynomials, Redux
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' An S4 class representing an Polynomial object
+##' @slot text a character object containing an equation
+##' @slot members a list of polynomial objects
+##'@slot operators a vector of additions/subtractions
+##' See above
+##' @export
+setClass("Polynomial", representation = list(text="character", members="list", operators="character"))
+#+END_SRC
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' convert a string in polynomial form to an Equation object
+##'
+##' I really need to rename some of this stuff
+##' @title as_polynomial
+##' @param string an equation of the form cx^n+/-cx^n.., c
+##' @return an equation object representing the 
+##' @author richie
+##' @export
+as_polynomial <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    polylist <- sapply(textlist, to_expression)
+    eq <- methods::new("Polynomial", text=string, members=polylist, )
+    return(eq)
+}
+#+END_SRC
+
 
 * Footnotes
 
