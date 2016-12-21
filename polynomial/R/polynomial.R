@@ -45,10 +45,10 @@ to_expression <- function(string) {
 
 ##' differentiate a expression object
 ##'
-##' returns a new polynomial
+##' returns a new expression object
 ##' @title diff_expression
 ##' @param expression 
-##' @return a new polynomial
+##' @return a new expression
 ##' @author richie
 ##' @export
 diff_expression <- function(object, ...) {
@@ -61,6 +61,9 @@ diff_expression <- function(object, ...) {
                          exponent = newxp)
 
 }
+##' A generic to perform differentiation
+##'
+##' Works for expression objects right now
 ##' @export
 setGeneric("differentiate", function(object, ...) {
     standardGeneric("differentiate")
@@ -102,19 +105,29 @@ setGeneric("exponent", function(object, ...) {
 setGeneric("variable", function(object, ...) {
     standardGeneric("variable")
 })
+
 ##' @export
-exponent <- function(obj, ...) {
-    standardGeneric("exponent", fdef=exp_poly)
-}
-##' @export
-exp_poly <- function(expression) {
+exponent_expression <- function(expression) {
     exp <- expression@exponent
 
 }
 ##' @export
-var_poly <- function(expression) {
-    expression@var
+exponent <- function(obj, ...) {
+    standardGeneric("exponent", fdef=exponent_expression)
 }
+
+##' @export
+variable_expression <- function(object, ...) {
+    object@var
+}
+setMethod("variable", signature(object="Expression"),
+          definition=variable_expression)
+
+##'Get the coefficients of an expression
+##'
+##'
+##' @param object an expression object
+##' @param ...
 ##' @export
 coef_expression <- function(object, ...) {
     object@coefficient
