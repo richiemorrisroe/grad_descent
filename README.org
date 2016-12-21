@@ -134,7 +134,7 @@ setClass("Expression", slots=list(coefficient="integer",
 ##' Convert a string to a polynomial
 ##'
 ##' Code assumes strings of the form 20x, 10^2 or 2xy^2
-##' @title to_polynomial
+##' @title to_expression
 ##' @param string 
 ##' @return a polynomial object
 ##' @author richie
@@ -231,7 +231,7 @@ setClass("Polynomial", representation = list(text="character", members="list"))
 ##' @export
 as_polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
-    polylist <- sapply(textlist, to_polynomial)
+    polylist <- sapply(textlist, to_expression)
     eq <- methods::new("Equation", text=string, members=polylist)
     return(eq)
 }
@@ -362,8 +362,37 @@ expression_to_function <- function(expression) {
 #+END_SRC
 
 We can now tangle this version into the package we've been building. 
+*** Tests
+
+These are essential. I'm pretty sure that I've silently broken a bunch of functionality with all my casual renaming and changing of stuff. We should write some tests that actually specify behaviour so that we notice such breakages immediately.
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/tests/testthat/test_first.R
+require(testthat)
+test_that("20x can be converted to an expression",
+          expect_is(expression("20x"), "Expression"))
+#+END_SRC
 
 
+** Handling Operators for Polynomials
+
+So, we have two major classes defined here. The first ~Expression~ represents a component of a ~Polynomial~ which consists of one or more expression objects expressed as an equation. 
+
+Currently, ~Polynomials~ look like this. 
+
+#+BEGIN_SRC R :session  :results output
+print(getClass ("Polynomial"))
+
+#+END_SRC
+
+#+RESULTS:
+: Class "Polynomial" [package "polynomial"]
+: 
+: Slots:
+:                           
+: Name:       text   members
+: Class: character      list
+
+What it needs is a third component, operators which contain a vector of addition/subtraction operators. These can then be used to recombine the elements (for printing), or to arrange the functions so that we can finally finish our gradient descent. 
 
 * Footnotes
 

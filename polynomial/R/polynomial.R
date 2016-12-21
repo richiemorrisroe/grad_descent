@@ -23,7 +23,7 @@ setClass("Expression", slots=list(coefficient="integer",
 ##' Convert a string to a polynomial
 ##'
 ##' Code assumes strings of the form 20x, 10^2 or 2xy^2
-##' @title to_polynomial
+##' @title to_expression
 ##' @param string 
 ##' @return a polynomial object
 ##' @author richie
@@ -83,7 +83,7 @@ setClass("Polynomial", representation = list(text="character", members="list"))
 ##' @export
 as_polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
-    polylist <- sapply(textlist, to_polynomial)
+    polylist <- sapply(textlist, to_expression)
     eq <- methods::new("Equation", text=string, members=polylist)
     return(eq)
 }
