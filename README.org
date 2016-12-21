@@ -113,7 +113,6 @@ devtools::use_build_ignore("^#")
 devtools::use_build_ignore("build_poly.R")
 devtools::use_testthat()
 devtools::use_package("stringr")
-devtools::use_package("methods")
 devtools::document()
 devtools::check()
 devtools::build()
@@ -156,6 +155,55 @@ to_expression <- function(string) {
 #+END_SRC
 
 So we can just call eveything a polynomial and just implement a method for this kind of object right now. 
+
+Let's define some getters, to avoid errors. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' @export
+setGeneric("exponent", function(object, ...) {
+    standardGeneric("exponent")
+})
+##' @export
+setGeneric("variable", function(object, ...) {
+    standardGeneric("variable")
+})
+
+##' @export
+exponent_expression <- function(object, ...) {
+    exp <- object@exponent
+
+}
+##' @export
+exponent <- function(object, ...) {
+    standardGeneric("exponent", fdef=exponent_expression)
+}
+
+##' @export
+variable_expression <- function(object, ...) {
+    object@var
+}
+setMethod("variable", signature(object="Expression"),
+          definition=variable_expression)
+
+##'Get the coefficients of an expression
+##'
+##'
+##' @param object an expression object
+##' @param ...
+##' @export
+coef_expression <- function(object, ...) {
+    object@coefficient
+}
+##' A coefficient method for Expression objects
+##'
+##' As above
+##' @export
+setMethod("coef",
+    signature(object = "Expression"),
+    definition=coef_expression
+)
+
+#+END_SRC
 
 #+BEGIN_SRC R :session :results none :eval no
 derive_polynomial <- function(polynomial) {
@@ -310,52 +358,7 @@ equation_to_function <- function(equation) {
 
 So, I should write some utility methods. S4 is strict and everything, but you can completely ignore all of the validity checks just by using ~@~ [fn:1]. Luckily, I would never do that, and hence why I'm writing some extractor functions. 
 
-#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
-##' @export
-setGeneric("exponent", function(object, ...) {
-    standardGeneric("exponent")
-})
-##' @export
-setGeneric("variable", function(object, ...) {
-    standardGeneric("variable")
-})
 
-##' @export
-exponent_expression <- function(expression) {
-    exp <- expression@exponent
-
-}
-##' @export
-exponent <- function(obj, ...) {
-    standardGeneric("exponent", fdef=exponent_expression)
-}
-
-##' @export
-variable_expression <- function(object, ...) {
-    object@var
-}
-setMethod("variable", signature(object="Expression"),
-          definition=variable_expression)
-
-##'Get the coefficients of an expression
-##'
-##'
-##' @param object an expression object
-##' @param ...
-##' @export
-coef_expression <- function(object, ...) {
-    object@coefficient
-}
-##' A coefficient method for Polynomial objects
-##'
-##' As above
-##' @export
-setMethod("coef",
-    signature(object = "Expression"),
-    definition=coef_expression
-)
-
-#+END_SRC
 
 Everytime I write this boilerplate, I die a little. 
 *** Functions, more generally

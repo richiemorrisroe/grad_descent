@@ -43,60 +43,6 @@ to_expression <- function(string) {
                exponent=as.integer(exp))
 }
 
-##' differentiate a expression object
-##'
-##' returns a new expression object
-##' @title diff_expression
-##' @param expression 
-##' @return a new expression
-##' @author richie
-##' @export
-diff_expression <- function(object, ...) {
-    newxp <- object@exponent - 1
-    newcoeff <- object@exponent * coef(object)
-    var <- variable(object)
-    res <-  methods::new("Expression",
-                         coefficient=newcoeff,
-                         variable=var,
-                         exponent = newxp)
-
-}
-##' A generic to perform differentiation
-##'
-##' Works for expression objects right now
-##' @export
-setGeneric("differentiate", function(object, ...) {
-    standardGeneric("differentiate")
-})
-##' @export
-setMethod("differentiate", signature(object="Expression"),
-          definition=diff_expression)
-
-##' An S4 class representing an Polynomial object
-##' @slot text a character object containing an equation
-##' @slot members a list of polynomial objects
-##'
-##' See above
-##' @export
-setClass("Polynomial", representation = list(text="character", members="list"))
-##' convert a string in polynomial form to an Equation object
-##'
-##' I really need to rename some of this stuff
-##' @title as_polynomial
-##' @param string an equation of the form cx^n+/-cx^n.., c
-##' @return an equation object representing the 
-##' @author richie
-##' @export
-as_polynomial <- function(string) {
-    textlist <- unlist(expression_to_text(string))
-    polylist <- sapply(textlist, to_expression)
-    eq <- methods::new("Equation", text=string, members=polylist)
-    return(eq)
-}
-diff_polynomial <- function(eq) {
-    #todo
-}
-
 ##' @export
 setGeneric("exponent", function(object, ...) {
     standardGeneric("exponent")
@@ -140,6 +86,60 @@ setMethod("coef",
     signature(object = "Expression"),
     definition=coef_expression
 )
+
+##' differentiate a expression object
+##'
+##' returns a new expression object
+##' @title diff_expression
+##' @param expression 
+##' @return a new expression
+##' @author richie
+##' @export
+diff_expression <- function(object, ...) {
+    newxp <- object@exponent - 1
+    newcoeff <- object@exponent * coef(object)
+    var <- variable(object)
+    res <-  methods::new("Expression",
+                         coefficient=newcoeff,
+                         variable=var,
+                         exponent = newxp)
+
+}
+##' A generic to perform differentiation
+##'
+##' Works for expression objects right now
+##' @export
+setGeneric("differentiate", function(object, ...) {
+    standardGeneric("differentiate")
+})
+##' @export
+setMethod("differentiate", signature(object="Expression"),
+          definition=diff_expression)
+
+##' An S4 class representing an Polynomial object
+##' @slot text a character object containing an equation
+##' @slot members a list of polynomial objects
+##'
+##' See above
+##' @export
+setClass("Polynomial", representation = list(text="character", members="list"))
+##' convert a string in polynomial form to an Polynomial object
+##'
+##' 
+##' @title as_polynomial
+##' @param string an equation of the form cx^n+/-cx^n.., c
+##' @return an equation object representing the 
+##' @author richie
+##' @export
+polynomial <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    polylist <- sapply(textlist, to_expression)
+    eq <- methods::new("Equation", text=string, members=polylist)
+    return(eq)
+}
+diff_polynomial <- function(eq) {
+    #todo
+}
 
 ##' convert an expression object to a function over the variable(s)
 ##'
