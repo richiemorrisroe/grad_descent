@@ -108,7 +108,7 @@ I think that I'll create a simple class to hold them
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/build_poly.R
 setwd('~/Dropbox/Code/Stats/polynomial/')
-devtools::setup(".")
+devtools::setup(".", rstudio=FALSE)
 devtools::use_build_ignore("^#")
 devtools::use_testthat()
 devtools::use_package("stringr")
