@@ -48,7 +48,6 @@ What I was going for here was that I could just pass R an unquoted expression of
 So this is needlessly complicated for something that didn't work. A better implementation is below. 
 
 #+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
-##'@importFrom methods new
 ##' Convert mathematical expression stored as string  into its component parts
 ##'
 ##' Right now just splits on + and -
@@ -150,7 +149,7 @@ to_expression <- function(string) {
     else {
         exp <- 0
     }
-    exp <- new("Expression", coefficient=as.integer(coeff),
+    exp <- methods::new("Expression", coefficient=as.integer(coeff),
                variable=var,
                exponent=as.integer(exp))
 }
@@ -186,7 +185,7 @@ Maybe give the differentiate function an argument to either be symbolic or not. 
 ##' @export
 diff_expression <- function(object, ...) {
     res <- with(object,
-                new("Expression", coefficient=exponent*coefficient,
+                methods::new("Expression", coefficient=exponent*coefficient,
                     variable=variable,
                     exponent = exponent-1))
     
@@ -233,7 +232,7 @@ setClass("Polynomial", representation = list(text="character", members="list"))
 as_polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
     polylist <- sapply(textlist, to_polynomial)
-    eq <- new("Equation", text=string, members=polylist)
+    eq <- methods::new("Equation", text=string, members=polylist)
     return(eq)
 }
 diff_polynomial <- function(eq) {

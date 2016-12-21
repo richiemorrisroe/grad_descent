@@ -1,5 +1,4 @@
 
-##'@importFrom methods new
 ##' Convert mathematical expression stored as string  into its component parts
 ##'
 ##' Right now just splits on + and -
@@ -39,7 +38,7 @@ to_expression <- function(string) {
     else {
         exp <- 0
     }
-    exp <- new("Expression", coefficient=as.integer(coeff),
+    exp <- methods::new("Expression", coefficient=as.integer(coeff),
                variable=var,
                exponent=as.integer(exp))
 }
@@ -54,7 +53,7 @@ to_expression <- function(string) {
 ##' @export
 diff_expression <- function(object, ...) {
     res <- with(object,
-                new("Expression", coefficient=exponent*coefficient,
+                methods::new("Expression", coefficient=exponent*coefficient,
                     variable=variable,
                     exponent = exponent-1))
     
@@ -85,7 +84,7 @@ setClass("Polynomial", representation = list(text="character", members="list"))
 as_polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
     polylist <- sapply(textlist, to_polynomial)
-    eq <- new("Equation", text=string, members=polylist)
+    eq <- methods::new("Equation", text=string, members=polylist)
     return(eq)
 }
 diff_polynomial <- function(eq) {
