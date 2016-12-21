@@ -121,6 +121,11 @@ devtools::install()
 *** Polynomials
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' An S4 class for Polynomial objects 
+##' @slot coefficient - an integer representing the coefficient
+##' @slot variable - the indeterminate in the equation
+##' @slot exponent the exponent portion of the object
+##' See above
 ##' @export
 setClass("Polynomial", slots=list(coefficient="integer",
                                            variable="character",
@@ -193,7 +198,7 @@ setMethod("differentiate", signature(object="Polynomial"),
           definition=diff_poly)
 #+END_SRC
 
-#+BEGIN_SRC R :session :results none :tangle polynomial/R/provide.R
+#+BEGIN_SRC R :session :results none :
   provide <- function(package) {
       if(!require(package)) {install.packages(deparse(substitute(package)))}
       else {
@@ -201,10 +206,18 @@ setMethod("differentiate", signature(object="Polynomial"),
       }
   }
 #+END_SRC
+
+This is just a utility that I often need. It generates warnings if put in a package though. 
+
 So, next I need to represent an equation, which consists of one or more Polynomial objects. 
 *** Equation
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' An S4 class representing an Equation object
+##' @slot text a character object containing an equation
+##' @slot members a list of polynomial objects
+##'
+##' See above
 ##' @export
 setClass("Equation", representation = list(text="character", members="list"))
 ##' convert a string in polynomial form to an Equation object
@@ -266,7 +279,7 @@ So, that was easier than expected. It's going to break unless I make some change
 
 Let's make sure it doesn't work. 
 
-#+BEGIN_SRC R :session :results output
+#+BEGIN_SRC R :session :results output :exports both
 poly_wrong <- to_polynomial("20x")
 wrong_func <- polynomial_to_function(poly_wrong)
 r <- wrong_func(1) #should be 20, will be zero
@@ -288,7 +301,7 @@ equation_to_function <- function(equation) {
 #+END_SRC
 
 
-So, I should write some utility methods. S4 is strict and everything, but you can completely ignore all of the validity checks just by using ~@~[fn:1]. Luckily, I would never do that, and hence why I'm writing some extractor functions. 
+So, I should write some utility methods. S4 is strict and everything, but you can completely ignore all of the validity checks just by using ~@~ [fn:1]. Luckily, I would never do that, and hence why I'm writing some extractor functions. 
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
 ##' @export
@@ -316,6 +329,9 @@ var_poly <- function(polynomial) {
 coef_poly <- function(object, ...) {
     object@coefficient
 }
+##' A coefficient method for Polynomial objects
+##'
+##' As above
 ##' @export
 setMethod("coef",
     signature(object = "Polynomial"),

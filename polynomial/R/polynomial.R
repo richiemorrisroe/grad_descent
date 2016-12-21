@@ -11,6 +11,11 @@ expression_to_text <- function(string) {
     res <- stringr::str_split(string, "\\+|-")
 }
 
+##' An S4 class for Polynomial objects 
+##' @slot coefficient - an integer representing the coefficient
+##' @slot variable - the indeterminate in the equation
+##' @slot exponent the exponent portion of the object
+##' See above
 ##' @export
 setClass("Polynomial", slots=list(coefficient="integer",
                                            variable="character",
@@ -61,6 +66,11 @@ setGeneric("differentiate", function(object) {
 setMethod("differentiate", signature(object="Polynomial"),
           definition=diff_poly)
 
+##' An S4 class representing an Equation object
+##' @slot text a character object containing an equation
+##' @slot members a list of polynomial objects
+##'
+##' See above
 ##' @export
 setClass("Equation", representation = list(text="character", members="list"))
 ##' convert a string in polynomial form to an Equation object
@@ -106,6 +116,9 @@ var_poly <- function(polynomial) {
 coef_poly <- function(object, ...) {
     object@coefficient
 }
+##' A coefficient method for Polynomial objects
+##'
+##' As above
 ##' @export
 setMethod("coef",
     signature(object = "Polynomial"),
