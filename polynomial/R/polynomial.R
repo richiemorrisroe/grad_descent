@@ -77,14 +77,13 @@ exp_poly <- function(polynomial) {
 var_poly <- function(polynomial) {
     polynomial@var
 }
-
+coef_poly <- function(object, ...) {
+    object@coefficient
+}
 setMethod("coef",
     signature(object = "Polynomial"),
     definition=coef_poly
 )
-coef_poly <- function(object, ...) {
-    object@coefficient
-}
 
 polynomial_to_function <- function(polynomial) {
     return(function(x) {

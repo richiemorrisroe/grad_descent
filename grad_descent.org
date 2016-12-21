@@ -100,10 +100,12 @@ I think that I'll create a simple class to hold them
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/build_poly.R
 setwd('~/Dropbox/Code/Stats/polynomial/')
-devtools::setup(".", rstudio=FALSE)
 devtools::use_build_ignore("^#")
 devtools::use_testthat()
 devtools::document()
+devtools::build()
+devtools::check()
+devtools::install()
 #+END_SRC
 *** Polynomials
 
@@ -275,14 +277,14 @@ exp_poly <- function(polynomial) {
 var_poly <- function(polynomial) {
     polynomial@var
 }
-
+coef_poly <- function(object, ...) {
+    object@coefficient
+}
 setMethod("coef",
     signature(object = "Polynomial"),
     definition=coef_poly
 )
-coef_poly <- function(object, ...) {
-    object@coefficient
-}
+
 #+END_SRC
 
 Everytime I write this boilerplate, I die a little. 
