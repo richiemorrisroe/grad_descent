@@ -2,6 +2,7 @@
 setwd('~/Dropbox/Code/Stats/polynomial/')
 devtools::setup(".", rstudio=FALSE)
 devtools::use_build_ignore("^#")
+devtools::use_build_ignore("build_poly.R")
 devtools::use_testthat()
 devtools::use_package("stringr")
 devtools::use_package("methods")
