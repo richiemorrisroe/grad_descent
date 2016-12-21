@@ -129,7 +129,7 @@ devtools::install()
 ##' @export
 setClass("Expression", slots=list(coefficient="integer",
                                            variable="character",
-                                  exponent="integer"))
+                                 exponent="integer"))
 ##' Convert a string to a polynomial
 ##'
 ##' Code assumes strings of the form 20x, 10^2 or 2xy^2
@@ -180,7 +180,7 @@ exponent <- function(object, ...) {
 
 ##' @export
 variable_expression <- function(object, ...) {
-    object@var
+    object@variable
 }
 setMethod("variable", signature(object="Expression"),
           definition=variable_expression)
@@ -267,7 +267,7 @@ This is just a utility that I often need. It generates warnings if put in a pack
 So, next I need to represent an equation, which consists of one or more Polynomial objects. 
 *** Equation
 
-#+BEGIN_SRC R :session :results none :tangle no
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
 ##' An S4 class representing an Polynomial object
 ##' @slot text a character object containing an equation
 ##' @slot members a list of polynomial objects
@@ -277,7 +277,7 @@ So, next I need to represent an equation, which consists of one or more Polynomi
 setClass("Polynomial", representation = list(text="character", members="list"))
 #+END_SRC
 
-#+BEGIN_SRC R :session :results none :tangle no
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
 
 ##' convert a string in polynomial form to an Equation object
 ##'
@@ -287,10 +287,11 @@ setClass("Polynomial", representation = list(text="character", members="list"))
 ##' @return an equation object representing the 
 ##' @author richie
 ##' @export
-as_polynomial <- function(string) {
+polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
+    ops <- unlist(stringr::str_extract_all(string, "\\+|\\-"))
     polylist <- sapply(textlist, to_expression)
-    eq <- methods::new("Polynomial", text=string, members=polylist, )
+    eq <- methods::new("Polynomial", text=string, members=polylist,operators=ops)
     return(eq)
 }
 diff_polynomial <- function(eq) {
@@ -442,14 +443,27 @@ setClass("Polynomial", representation = list(text="character", members="list", o
 ##' @return an equation object representing the 
 ##' @author richie
 ##' @export
-as_polynomial <- function(string) {
+polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
+    ops <- unlist(stringr::str_extract_all(string, "\\+|\\-"))
     polylist <- sapply(textlist, to_expression)
-    eq <- methods::new("Polynomial", text=string, members=polylist, )
+    eq <- methods::new("Polynomial",
+                       text=string,
+                       members=polylist,
+                       operators=ops)
     return(eq)
 }
 #+END_SRC
 
+#+BEGIN_SRC R :session tangle 
+diff_polynomial <- function(polynomial) {
+    ops <- polynomial@operators
+    members <- polynomial@members
+    diff_members <- lapply(members, differentiate)
+    diffed_func <- lapply(diff_members, expression_to_function)
+
+}
+#+END_SRC
 
 * Footnotes
 
