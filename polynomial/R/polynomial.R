@@ -11,13 +11,13 @@ expression_to_text <- function(string) {
     res <- stringr::str_split(string, "\\+|-")
 }
 
-##' An S4 class for Polynomial objects 
+##' An S4 class for Expression objects 
 ##' @slot coefficient - an integer representing the coefficient
 ##' @slot variable - the indeterminate in the equation
 ##' @slot exponent the exponent portion of the object
 ##' See above
 ##' @export
-setClass("Polynomial", slots=list(coefficient="integer",
+setClass("Expression", slots=list(coefficient="integer",
                                            variable="character",
                                   exponent="integer"))
 ##' Convert a string to a polynomial
@@ -28,7 +28,7 @@ setClass("Polynomial", slots=list(coefficient="integer",
 ##' @return a polynomial object
 ##' @author richie
 ##' @export
-to_polynomial <- function(string) {
+to_expression <- function(string) {
     var <- stringr::str_extract(string, "([A-Za-z]+)")
     coeff <- stringr::str_extract(string, "([0-9]+)")
     message("var is: ", var, "\n", "coeff is: ", coeff)
@@ -38,56 +38,56 @@ to_polynomial <- function(string) {
     else {
         exp <- 0
     }
-    exp <- new("Polynomial", coefficient=as.integer(coeff),
+    exp <- new("Expression", coefficient=as.integer(coeff),
                variable=var,
                exponent=as.integer(exp))
 }
 
-##' differentiate a polynomial object
+##' differentiate a expression object
 ##'
 ##' returns a new polynomial
-##' @title diff_poly
+##' @title diff_expression
 ##' @param expression 
 ##' @return a new polynomial
 ##' @author richie
 ##' @export
-diff_poly <- function(expression) {
-    res <- with(expression,
-                new("Polynomial", coefficient=exponent*coefficient,
+diff_expression <- function(object, ...) {
+    res <- with(object,
+                new("Expression", coefficient=exponent*coefficient,
                     variable=variable,
                     exponent = exponent-1))
     
 }
 ##' @export
-setGeneric("differentiate", function(object) {
+setGeneric("differentiate", function(object, ...) {
     standardGeneric("differentiate")
 })
 ##' @export
-setMethod("differentiate", signature(object="Polynomial"),
-          definition=diff_poly)
+setMethod("differentiate", signature(object="Expression"),
+          definition=diff_expression)
 
-##' An S4 class representing an Equation object
+##' An S4 class representing an Polynomial object
 ##' @slot text a character object containing an equation
 ##' @slot members a list of polynomial objects
 ##'
 ##' See above
 ##' @export
-setClass("Equation", representation = list(text="character", members="list"))
+setClass("Polynomial", representation = list(text="character", members="list"))
 ##' convert a string in polynomial form to an Equation object
 ##'
 ##' I really need to rename some of this stuff
-##' @title as_equation
+##' @title as_polynomial
 ##' @param string an equation of the form cx^n+/-cx^n.., c
 ##' @return an equation object representing the 
 ##' @author richie
 ##' @export
-as_equation <- function(string) {
+as_polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
     polylist <- sapply(textlist, to_polynomial)
     eq <- new("Equation", text=string, members=polylist)
     return(eq)
 }
-diff_equation <- function(eq) {
+diff_polynomial <- function(eq) {
     #todo
 }
 
@@ -104,16 +104,16 @@ exponent <- function(obj, ...) {
     standardGeneric("exponent", fdef=exp_poly)
 }
 ##' @export
-exp_poly <- function(polynomial) {
-    exp <- polynomial@exponent
+exp_poly <- function(expression) {
+    exp <- expression@exponent
 
 }
 ##' @export
-var_poly <- function(polynomial) {
-    polynomial@var
+var_poly <- function(expression) {
+    expression@var
 }
 ##' @export
-coef_poly <- function(object, ...) {
+coef_expression <- function(object, ...) {
     object@coefficient
 }
 ##' A coefficient method for Polynomial objects
@@ -121,8 +121,8 @@ coef_poly <- function(object, ...) {
 ##' As above
 ##' @export
 setMethod("coef",
-    signature(object = "Polynomial"),
-    definition=coef_poly
+    signature(object = "Expression"),
+    definition=coef_expression
 )
 
 ##' convert a polynomial object to a function over the variable(s)
