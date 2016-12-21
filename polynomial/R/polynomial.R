@@ -52,11 +52,14 @@ to_expression <- function(string) {
 ##' @author richie
 ##' @export
 diff_expression <- function(object, ...) {
-    res <- with(object,
-                methods::new("Expression", coefficient=exponent*coefficient,
-                    variable=variable,
-                    exponent = exponent-1))
-    
+    newxp <- object@exponent - 1
+    newcoeff <- object@exponent * coef(object)
+    var <- variable(object)
+    res <-  methods::new("Expression",
+                         coefficient=newcoeff,
+                         variable=var,
+                         exponent = newxp)
+
 }
 ##' @export
 setGeneric("differentiate", function(object, ...) {
