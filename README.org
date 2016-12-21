@@ -1,12 +1,15 @@
 * Gradient Descent
 
 - This is a method for approximating functions
-- It uses small spets in the opposite direction to the gradient.
+- It uses small movements in the opposite direction to the gradient.
+
+- The gradient is the derivative of the function
+
 - So, in order to do this, we need to be able to differentiate the function.
 - We'll give this a shot in ~R~.
 ** Calculus
 
-#+BEGIN_SRC R :session  :results none :exports none
+#+BEGIN_SRC R :session  :results none :exports code
 where_number <- function(expr) {
     pos <- grep("[0-9]+", x=expr)
 }
@@ -40,16 +43,19 @@ deriv <- function(expr) {
 
 So, above we handle the different kinds of values we can expect in our text. Right now, I only recognise addition, subtraction, multiplication, division and exponentiation. This is good enough for the time being (though clearly I'd want to at least be able to evaluate ~sin~ and ~cos~ at some point). 
 
+What I was going for here was that I could just pass R an unquoted expression of the form 20x^2+30x+3, but that didn't work, because R couldn't handle that kind of form without a global definition of x (and even then, the syntax wouldn't work). 
+
 So this is needlessly complicated for something that didn't work. A better implementation is below. 
 
 #+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
-##' Convert mathematical expression into its component parts
+##' Convert mathematical expression stored as string  into its component parts
 ##'
 ##' Right now just splits on + and -
 ##' @title expression_to_text
 ##' @param string 
 ##' @return a vector of characters representing an equation
 ##' @author richie
+##' @export
 expression_to_text <- function(string) {
     res <- stringr::str_split(string, "\\+|-")
 }
@@ -67,6 +73,8 @@ diff_variable <- function(expr) {
     
 }
 #+END_SRC
+
+I ended up not using these, and representing each element as a polynomial. 
 
 So, I need to rethink my design. I need to split the function into powers, variables (x^1) and constants. 
 
@@ -100,8 +108,11 @@ I think that I'll create a simple class to hold them
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/build_poly.R
 setwd('~/Dropbox/Code/Stats/polynomial/')
+devtools::setup(".")
 devtools::use_build_ignore("^#")
 devtools::use_testthat()
+devtools::use_package("stringr")
+devtools::use_package("methods")
 devtools::document()
 devtools::build()
 devtools::check()
@@ -110,6 +121,7 @@ devtools::install()
 *** Polynomials
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' @export
 setClass("Polynomial", slots=list(coefficient="integer",
                                            variable="character",
                                   exponent="integer"))
@@ -120,6 +132,7 @@ setClass("Polynomial", slots=list(coefficient="integer",
 ##' @param string 
 ##' @return a polynomial object
 ##' @author richie
+##' @export
 to_polynomial <- function(string) {
     var <- stringr::str_extract(string, "([A-Za-z]+)")
     coeff <- stringr::str_extract(string, "([0-9]+)")
@@ -156,6 +169,14 @@ I also need to be able to actually provide numerical results.
 Maybe give the differentiate function an argument to either be symbolic or not. I should just return the polynomial, and defer the printing done by the current function. 
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' differentiate a polynomial object
+##'
+##' returns a new polynomial
+##' @title diff_poly
+##' @param expression 
+##' @return a new polynomial
+##' @author richie
+##' @export
 diff_poly <- function(expression) {
     res <- with(expression,
                 new("Polynomial", coefficient=exponent*coefficient,
@@ -163,9 +184,11 @@ diff_poly <- function(expression) {
                     exponent = exponent-1))
     
 }
+##' @export
 setGeneric("differentiate", function(object) {
     standardGeneric("differentiate")
 })
+##' @export
 setMethod("differentiate", signature(object="Polynomial"),
           definition=diff_poly)
 #+END_SRC
@@ -182,7 +205,16 @@ So, next I need to represent an equation, which consists of one or more Polynomi
 *** Equation
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' @export
 setClass("Equation", representation = list(text="character", members="list"))
+##' convert a string in polynomial form to an Equation object
+##'
+##' I really need to rename some of this stuff
+##' @title as_equation
+##' @param string an equation of the form cx^n+/-cx^n.., c
+##' @return an equation object representing the 
+##' @author richie
+##' @export
 as_equation <- function(string) {
     textlist <- unlist(expression_to_text(string))
     polylist <- sapply(textlist, to_polynomial)
@@ -259,27 +291,32 @@ equation_to_function <- function(equation) {
 So, I should write some utility methods. S4 is strict and everything, but you can completely ignore all of the validity checks just by using ~@~[fn:1]. Luckily, I would never do that, and hence why I'm writing some extractor functions. 
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' @export
 setGeneric("exponent", function(object) {
     standardGeneric("exponent")
 })
-
+##' @export
 setGeneric("var", function(object) {
     standardGeneric("var")
 })
-
+##' @export
 exponent <- function(obj) {
     standardGeneric("exponent", fdef=exp_poly)
 }
+##' @export
 exp_poly <- function(polynomial) {
     exp <- polynomial@exponent
 
 }
+##' @export
 var_poly <- function(polynomial) {
     polynomial@var
 }
+##' @export
 coef_poly <- function(object, ...) {
     object@coefficient
 }
+##' @export
 setMethod("coef",
     signature(object = "Polynomial"),
     definition=coef_poly
@@ -293,6 +330,14 @@ Everytime I write this boilerplate, I die a little.
 Let's re-write the polynomial_to_function a little more cleanly. 
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+##' convert a polynomial object to a function over the variable(s)
+##'
+##' Right now only works for one variable functions
+##' @title polynomial_to_function
+##' @param polynomial 
+##' @return a function which takes an argument x and computes the value of the function
+##' @author richie
+##' @export
 polynomial_to_function <- function(polynomial) {
     return(function(x) {
         res <-   coef(polynomial)  * x ^(exponent(polynomial))
