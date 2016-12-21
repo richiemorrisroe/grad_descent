@@ -48,6 +48,7 @@ What I was going for here was that I could just pass R an unquoted expression of
 So this is needlessly complicated for something that didn't work. A better implementation is below. 
 
 #+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
+##'@importFrom methods new
 ##' Convert mathematical expression stored as string  into its component parts
 ##'
 ##' Right now just splits on + and -
@@ -346,7 +347,7 @@ Everytime I write this boilerplate, I die a little.
 Let's re-write the polynomial_to_function a little more cleanly. 
 
 #+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
-##' convert a polynomial object to a function over the variable(s)
+##' convert an expression object to a function over the variable(s)
 ##'
 ##' Right now only works for one variable functions
 ##' @title polynomial_to_function
@@ -354,9 +355,9 @@ Let's re-write the polynomial_to_function a little more cleanly.
 ##' @return a function which takes an argument x and computes the value of the function
 ##' @author richie
 ##' @export
-polynomial_to_function <- function(polynomial) {
+expression_to_function <- function(expression) {
     return(function(x) {
-        res <-   coef(polynomial)  * x ^(exponent(polynomial))
+        res <-   coef(expression)  * x ^(exponent(expression))
     })}
 #+END_SRC
 

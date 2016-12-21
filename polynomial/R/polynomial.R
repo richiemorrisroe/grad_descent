@@ -1,4 +1,5 @@
 
+##'@importFrom methods new
 ##' Convert mathematical expression stored as string  into its component parts
 ##'
 ##' Right now just splits on + and -
@@ -125,7 +126,7 @@ setMethod("coef",
     definition=coef_expression
 )
 
-##' convert a polynomial object to a function over the variable(s)
+##' convert an expression object to a function over the variable(s)
 ##'
 ##' Right now only works for one variable functions
 ##' @title polynomial_to_function
@@ -133,7 +134,7 @@ setMethod("coef",
 ##' @return a function which takes an argument x and computes the value of the function
 ##' @author richie
 ##' @export
-polynomial_to_function <- function(polynomial) {
+expression_to_function <- function(expression) {
     return(function(x) {
-        res <-   coef(polynomial)  * x ^(exponent(polynomial))
+        res <-   coef(expression)  * x ^(exponent(expression))
     })}
