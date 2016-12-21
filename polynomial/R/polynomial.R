@@ -82,15 +82,15 @@ diff_equation <- function(eq) {
 }
 
 ##' @export
-setGeneric("exponent", function(object) {
+setGeneric("exponent", function(object, ...) {
     standardGeneric("exponent")
 })
 ##' @export
-setGeneric("var", function(object) {
-    standardGeneric("var")
+setGeneric("variable", function(object, ...) {
+    standardGeneric("variable")
 })
 ##' @export
-exponent <- function(obj) {
+exponent <- function(obj, ...) {
     standardGeneric("exponent", fdef=exp_poly)
 }
 ##' @export
