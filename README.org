@@ -1,0 +1,308 @@
+* Gradient Descent
+
+- This is a method for approximating functions
+- It uses small spets in the opposite direction to the gradient.
+- So, in order to do this, we need to be able to differentiate the function.
+- We'll give this a shot in ~R~.
+** Calculus
+
+#+BEGIN_SRC R :session  :results none :exports none
+where_number <- function(expr) {
+    pos <- grep("[0-9]+", x=expr)
+}
+
+where_variable <- function(expr) {
+    pos <- grep("[A-Za-z]", expr)
+}
+
+where_operator <- function(expr) {
+    pos <- grep("[+-^/]", expr)
+}
+##' Convert an unquoted expression to a vector of text
+##'
+##' Interestingly enough, R seems to add spaces around + and -, but not around exponentiation i.e. ^. I have no idea why this is. 
+##' @title expression_to_text
+##' @param expr an unquoted expression
+##' @return a vector of characters representing the expression
+##' @author richie
+expression_to_text <- function(expr) {
+    exprtext <- deparse(substitute(expr))
+    expression_vec <- unlist(strsplit(exprtext, ""))
+}
+
+deriv <- function(expr) {
+ #todo
+    
+}
+#+END_SRC
+
+
+
+So, above we handle the different kinds of values we can expect in our text. Right now, I only recognise addition, subtraction, multiplication, division and exponentiation. This is good enough for the time being (though clearly I'd want to at least be able to evaluate ~sin~ and ~cos~ at some point). 
+
+So this is needlessly complicated for something that didn't work. A better implementation is below. 
+
+#+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
+##' Convert mathematical expression into its component parts
+##'
+##' Right now just splits on + and -
+##' @title expression_to_text
+##' @param string 
+##' @return a vector of characters representing an equation
+##' @author richie
+expression_to_text <- function(string) {
+    res <- stringr::str_split(string, "\\+|-")
+}
+#+END_SRC
+
+Next, I need to implement the rules of differentiation for these kinds of functions. 
+
+So all I really need is the exponentiation one, the variable one and the constant one. 
+
+#+BEGIN_SRC R :session
+diff_constant <- function(expr) {
+    res <-  0
+}
+diff_variable <- function(expr) {
+    
+}
+#+END_SRC
+
+So, I need to rethink my design. I need to split the function into powers, variables (x^1) and constants. 
+
+#+BEGIN_SRC R
+20x^2+30x+1
+#+END_SRC
+
+So, conceptually, that's three expressions, each handled by a different rule. 
+I feel like I could just handle the x to the power of 1 case along with the more general case. 
+
+So, the polynomial part is a transform of x^n -> nx^n-1
+
+#+BEGIN_SRC R :session  :results none 
+diff_poly <- function(base, exp) {
+    newexp <- exp - 1
+    res <- paste0(exp, "*", base, "^", newexp)
+    }
+#+END_SRC
+
+So, the function above neatly returns a string with the result of the evaluated expression. 
+We cheated though, and just manipulated strings. We don't actually have strings of that form available, which is our next step. 
+
+
+
+
+This means that I should be representing every part of the expression in the form constant, varable and exponent. 
+
+I think that I went too general with my early expression function, it seems much better to split on + and -
+The variables are kinda annoying.
+I think that I'll create a simple class to hold them
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/build_poly.R
+setwd('~/Dropbox/Code/Stats/polynomial/')
+devtools::use_build_ignore("^#")
+devtools::use_testthat()
+devtools::document()
+devtools::build()
+devtools::check()
+devtools::install()
+#+END_SRC
+*** Polynomials
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+setClass("Polynomial", slots=list(coefficient="integer",
+                                           variable="character",
+                                  exponent="integer"))
+##' Convert a string to a polynomial
+##'
+##' Code assumes strings of the form 20x, 10^2 or 2xy^2
+##' @title to_polynomial
+##' @param string 
+##' @return a polynomial object
+##' @author richie
+to_polynomial <- function(string) {
+    var <- stringr::str_extract(string, "([A-Za-z]+)")
+    coeff <- stringr::str_extract(string, "([0-9]+)")
+    message("var is: ", var, "\n", "coeff is: ", coeff)
+    if(grepl("\\^", x=string)) {
+        exp <- stringr::str_extract(string, "([0-9]+)$")
+    }
+    else {
+        exp <- 0
+    }
+    exp <- new("Polynomial", coefficient=as.integer(coeff),
+               variable=var,
+               exponent=as.integer(exp))
+}
+#+END_SRC
+
+So we can just call eveything a polynomial and just implement a method for this kind of object right now. 
+
+#+BEGIN_SRC R :session :results none
+derive_polynomial <- function(polynomial) {
+    base <- polynomial@coefficient
+    exp <- polynomial@exponent
+    res <- diff_poly(base, exp)
+}
+setGeneric("differentiate", def=derive_polynomial)
+#+END_SRC
+
+So, the code works, but it produces weird looking expressions because it doesn't automatically simplify the expressions.
+
+That's presumably what we should do next. 
+
+I also need to be able to actually provide numerical results.
+
+Maybe give the differentiate function an argument to either be symbolic or not. I should just return the polynomial, and defer the printing done by the current function. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+diff_poly <- function(expression) {
+    res <- with(expression,
+                new("Polynomial", coefficient=exponent*coefficient,
+                    variable=variable,
+                    exponent = exponent-1))
+    
+}
+setGeneric("differentiate", function(object) {
+    standardGeneric("differentiate")
+})
+setMethod("differentiate", signature(object="Polynomial"),
+          definition=diff_poly)
+#+END_SRC
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/provide.R
+  provide <- function(package) {
+      if(!require(package)) {install.packages(deparse(substitute(package)))}
+      else {
+          library(package)
+      }
+  }
+#+END_SRC
+So, next I need to represent an equation, which consists of one or more Polynomial objects. 
+*** Equation
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+setClass("Equation", representation = list(text="character", members="list"))
+as_equation <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    polylist <- sapply(textlist, to_polynomial)
+    eq <- new("Equation", text=string, members=polylist)
+    return(eq)
+}
+diff_equation <- function(eq) {
+    #todo
+}
+#+END_SRC
+
+So, the trouble with my equation class is that it loses the addition and subtraction operators. Not entirely sure how to handle this.
+
+There are some options: 
+- create operators which represent addition/subtraction
+- Add the information to the end of each polynomial. 
+
+Or I could just punt on it and hack together some gradient descent. 
+** Gradient Descent ()
+
+#+BEGIN_SRC R :session :results none
+gradient_descent <-
+    function(f, data, alpha=0.01, iterations) {
+        reslist <- vector(mode="list", length=iterations)
+        #this is magic
+        gradient <- differentiate(f)
+        for(i in seq_along(iterations)) {
+            message("iteration: ", i)
+            x <- x - alpha*gradient(x)
+            reslist[[i]] <- x
+        }
+        
+}
+#+END_SRC
+
+So, this looks nice. The only problem is that right now, my differentiate function isn't going to work. So, now I need to handle the stuff I said I'd ignore above. Note: code may or may not have been shamelessly copied from [[https://en.wikipedia.org/wiki/Gradient_descent#R][Wikipedia]]. 
+** Functions returning functions, oh my
+
+So, right now we have an equation object, which consists of a text string describing the function, and the constituent polynomials. We need to convert this into a function which can be applied to the input data (i.e. guess). 
+
+#+BEGIN_SRC R :session :results none
+polynomial_to_function <- function(polynomial) {
+    return(function(x) {
+        res <-   polynomial@coefficient  * x ^(polynomial@exponent)
+    })}
+#+END_SRC
+
+So, that was easier than expected. It's going to break unless I make some changes to my code though. I need to set the exponent value to 1, where it doesn't exist. Currently, I believe it will take zero, which will cause incorrect answers. 
+
+Let's make sure it doesn't work. 
+
+#+BEGIN_SRC R :session :results output
+poly_wrong <- to_polynomial("20x")
+wrong_func <- polynomial_to_function(poly_wrong)
+r <- wrong_func(1) #should be 20, will be zero
+print(r)
+#+END_SRC
+
+#+RESULTS:
+: var is: x
+: coeff is: 20
+: [1] 20
+
+Hmmm, it appears that I was incorrect. Weird. 
+
+#+BEGIN_SRC R :session :results none
+equation_to_function <- function(equation) {
+    string <- equation@text
+    diff <- lapply(equation@members, differentiate)
+}
+#+END_SRC
+
+
+So, I should write some utility methods. S4 is strict and everything, but you can completely ignore all of the validity checks just by using ~@~[fn:1]. Luckily, I would never do that, and hence why I'm writing some extractor functions. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+setGeneric("exponent", function(object) {
+    standardGeneric("exponent")
+})
+
+setGeneric("var", function(object) {
+    standardGeneric("var")
+})
+
+exponent <- function(obj) {
+    standardGeneric("exponent", fdef=exp_poly)
+}
+exp_poly <- function(polynomial) {
+    exp <- polynomial@exponent
+
+}
+var_poly <- function(polynomial) {
+    polynomial@var
+}
+coef_poly <- function(object, ...) {
+    object@coefficient
+}
+setMethod("coef",
+    signature(object = "Polynomial"),
+    definition=coef_poly
+)
+
+#+END_SRC
+
+Everytime I write this boilerplate, I die a little. 
+*** Functions, more generally
+
+Let's re-write the polynomial_to_function a little more cleanly. 
+
+#+BEGIN_SRC R :session :results none :tangle polynomial/R/polynomial.R
+polynomial_to_function <- function(polynomial) {
+    return(function(x) {
+        res <-   coef(polynomial)  * x ^(exponent(polynomial))
+    })}
+#+END_SRC
+
+We can now tangle this version into the package we've been building. 
+
+
+
+* Footnotes
+
+[fn:1] Of course. R's not a monster, you know
