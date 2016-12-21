@@ -1,5 +1,5 @@
 
-##' Convert mathematical expression into its component parts
+##' Convert mathematical expression stored as string  into its component parts
 ##'
 ##' Right now just splits on + and -
 ##' @title expression_to_text

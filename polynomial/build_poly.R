@@ -1,7 +1,9 @@
 
 setwd('~/Dropbox/Code/Stats/polynomial/')
+devtools::setup(".")
 devtools::use_build_ignore("^#")
 devtools::use_testthat()
+devtools::use_package("stringr")
 devtools::document()
 devtools::build()
 devtools::check()
