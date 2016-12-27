@@ -127,9 +127,9 @@ devtools::install()
 ##' @slot exponent the exponent portion of the object
 ##' See above
 ##' @export
-setClass("Expression", slots=list(coefficient="integer",
+setClass("Expression", slots=list(coefficient="numeric",
                                            variable="character",
-                                 exponent="integer"))
+                                 exponent="numeric"))
 ##' Convert a string to a polynomial
 ##'
 ##' Code assumes strings of the form 20x, 10^2 or 2xy^2

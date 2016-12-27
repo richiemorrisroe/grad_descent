@@ -17,9 +17,9 @@ expression_to_text <- function(string) {
 ##' @slot exponent the exponent portion of the object
 ##' See above
 ##' @export
-setClass("Expression", slots=list(coefficient="integer",
+setClass("Expression", slots=list(coefficient="numeric",
                                            variable="character",
-                                  exponent="integer"))
+                                 exponent="numeric"))
 ##' Convert a string to a polynomial
 ##'
 ##' Code assumes strings of the form 20x, 10^2 or 2xy^2
@@ -64,7 +64,7 @@ exponent <- function(object, ...) {
 
 ##' @export
 variable_expression <- function(object, ...) {
-    object@var
+    object@variable
 }
 setMethod("variable", signature(object="Expression"),
           definition=variable_expression)
@@ -116,6 +116,33 @@ setGeneric("differentiate", function(object, ...) {
 setMethod("differentiate", signature(object="Expression"),
           definition=diff_expression)
 
+##' An S4 class representing an Polynomial object
+##' @slot text a character object containing an equation
+##' @slot members a list of polynomial objects
+##'
+##' See above
+##' @export
+setClass("Polynomial", representation = list(text="character", members="list"))
+
+##' convert a string in polynomial form to an Equation object
+##'
+##' I really need to rename some of this stuff
+##' @title as_polynomial
+##' @param string an equation of the form cx^n+/-cx^n.., c
+##' @return an equation object representing the 
+##' @author richie
+##' @export
+polynomial <- function(string) {
+    textlist <- unlist(expression_to_text(string))
+    ops <- unlist(stringr::str_extract_all(string, "\\+|\\-"))
+    polylist <- sapply(textlist, to_expression)
+    eq <- methods::new("Polynomial", text=string, members=polylist,operators=ops)
+    return(eq)
+}
+diff_polynomial <- function(eq) {
+    #todo
+}
+
 ##' convert an expression object to a function over the variable(s)
 ##'
 ##' Right now only works for one variable functions
@@ -145,9 +172,13 @@ setClass("Polynomial", representation = list(text="character", members="list", o
 ##' @return an equation object representing the 
 ##' @author richie
 ##' @export
-as_polynomial <- function(string) {
+polynomial <- function(string) {
     textlist <- unlist(expression_to_text(string))
+    ops <- unlist(stringr::str_extract_all(string, "\\+|\\-"))
     polylist <- sapply(textlist, to_expression)
-    eq <- methods::new("Polynomial", text=string, members=polylist, )
+    eq <- methods::new("Polynomial",
+                       text=string,
+                       members=polylist,
+                       operators=ops)
     return(eq)
 }
