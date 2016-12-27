@@ -17,7 +17,7 @@ expression_to_text <- function(string) {
 ##' @slot exponent the exponent portion of the object
 ##' See above
 ##' @export
-setClass("Expression", slots=list(coefficient="numeric",
+setClass("Exp", slots=list(coefficient="numeric",
                                            variable="character",
                                  exponent="numeric"))
 ##' Convert a string to a polynomial
@@ -38,7 +38,7 @@ to_expression <- function(string) {
     else {
         exp <- 0
     }
-    exp <- methods::new("Expression", coefficient=as.integer(coeff),
+    exp <- methods::new("Exp", coefficient=as.integer(coeff),
                variable=var,
                exponent=as.integer(exp))
 }
@@ -66,7 +66,7 @@ exponent <- function(object, ...) {
 variable_expression <- function(object, ...) {
     object@variable
 }
-setMethod("variable", signature(object="Expression"),
+setMethod("variable", signature(object="Exp"),
           definition=variable_expression)
 
 ##'Get the coefficients of an expression
@@ -83,7 +83,7 @@ coef_expression <- function(object, ...) {
 ##' As above
 ##' @export
 setMethod("coef",
-    signature(object = "Expression"),
+    signature(object = "Exp"),
     definition=coef_expression
 )
 
@@ -99,7 +99,7 @@ diff_expression <- function(object, ...) {
     newxp <- object@exponent - 1
     newcoeff <- object@exponent * coef(object)
     var <- variable(object)
-    res <-  methods::new("Expression",
+    res <-  methods::new("Exp",
                          coefficient=newcoeff,
                          variable=var,
                          exponent = newxp)
@@ -113,7 +113,7 @@ setGeneric("differentiate", function(object, ...) {
     standardGeneric("differentiate")
 })
 ##' @export
-setMethod("differentiate", signature(object="Expression"),
+setMethod("differentiate", signature(object="Exp"),
           definition=diff_expression)
 
 ##' An S4 class representing an Polynomial object
