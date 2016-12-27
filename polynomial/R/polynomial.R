@@ -59,8 +59,11 @@ exponent_expression <- function(object, ...) {
 }
 ##' @export
 exponent <- function(object, ...) {
-    standardGeneric("exponent", fdef=exponent_expression)
+    standardGeneric("exponent")
 }
+
+setMethod("exponent", signature(object="Exp"),
+          definition=exponent_expression)
 
 ##' @export
 variable_expression <- function(object, ...) {
