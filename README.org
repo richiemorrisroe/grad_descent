@@ -383,9 +383,17 @@ Let's re-write the polynomial_to_function a little more cleanly.
 ##' @author richie
 ##' @export
 expression_to_function <- function(expression) {
-    return(function(x) {
-        res <-   coef(expression)  * x ^(exponent(expression))
-    })}
+    if(exponent(expression)>=1) {
+        return(function(x) {
+            res <-   coef(expression)  * x ^(exponent(expression))
+        })}
+    else {
+            return(function()) {
+                res <-  coef(expression) * 1 ^(exponent(expression))
+            }
+
+        }
+}
 #+END_SRC
 
 We can now tangle this version into the package we've been building. 
@@ -458,7 +466,7 @@ polynomial <- function(string) {
 }
 #+END_SRC
 
-#+BEGIN_SRC R :session tangle 
+#+BEGIN_SRC R :session :tangle 
 diff_polynomial <- function(polynomial) {
     ops <- polynomial@operators
     members <- polynomial@members
@@ -467,6 +475,8 @@ diff_polynomial <- function(polynomial) {
 
 }
 #+END_SRC
+
+#+RESULTS:
 
 * Footnotes
 

@@ -155,9 +155,17 @@ diff_polynomial <- function(eq) {
 ##' @author richie
 ##' @export
 expression_to_function <- function(expression) {
-    return(function(x) {
-        res <-   coef(expression)  * x ^(exponent(expression))
-    })}
+    if(exponent(expression)>=1) {
+        return(function(x) {
+            res <-   coef(expression)  * x ^(exponent(expression))
+        })}
+    else {
+            return(function()) {
+                res <-  coef(expression) * 1 ^(exponent(expression))
+            }
+
+        }
+}
 
 ##' An S4 class representing an Polynomial object
 ##' @slot text a character object containing an equation
