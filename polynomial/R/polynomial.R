@@ -160,9 +160,9 @@ expression_to_function <- function(expression) {
             res <-   coef(expression)  * x ^(exponent(expression))
         })}
     else {
-            return(function()) {
+            return(function() {
                 res <-  coef(expression) * 1 ^(exponent(expression))
-            }
+            })
 
         }
 }
@@ -192,4 +192,15 @@ polynomial <- function(string) {
                        members=polylist,
                        operators=ops)
     return(eq)
+}
+operators <- function(polynomial) {
+    ops <- polynomial@operators
+}
+
+diff_polynomial <- function(polynomial) {
+    ops <- polynomial@operators
+    members <- polynomial@members
+    diff_members <- lapply(members, differentiate)
+    diffed_func <- lapply(diff_members, expression_to_function)
+
 }

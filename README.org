@@ -388,9 +388,9 @@ expression_to_function <- function(expression) {
             res <-   coef(expression)  * x ^(exponent(expression))
         })}
     else {
-            return(function()) {
+            return(function() {
                 res <-  coef(expression) * 1 ^(exponent(expression))
-            }
+            })
 
         }
 }
@@ -464,9 +464,12 @@ polynomial <- function(string) {
                        operators=ops)
     return(eq)
 }
+operators <- function(polynomial) {
+    ops <- polynomial@operators
+}
 #+END_SRC
 
-#+BEGIN_SRC R :session :tangle 
+#+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
 diff_polynomial <- function(polynomial) {
     ops <- polynomial@operators
     members <- polynomial@members
@@ -476,7 +479,28 @@ diff_polynomial <- function(polynomial) {
 }
 #+END_SRC
 
-#+RESULTS:
+#+BEGIN_SRC R :session :results none
+add_func <- function(f, g) {
+    return(function() {
+        f + g
+    })
+}
+subtract_func <- function(f, g) {
+    return(function()
+           f - g)
+}
+combine_fns <- function(funcs, ops) {
+    for(i in 1:length(ops)) {
+        if(ops[i]=='+') {
+            f <- add_func(funcs[i], funcs[i+1])
+        }
+        if (ops[i]=='-') {
+            f <- subtract_func(f, funcs[i+1])
+        }
+    }
+    return(f)
+}
+#+END_SRC
 
 * Footnotes
 
