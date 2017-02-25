@@ -178,9 +178,9 @@ setClass("Polynomial", representation = list(text="character", members="list", o
 ##' convert a string in polynomial form to an Equation object
 ##'
 ##' I really need to rename some of this stuff
-##' @title as_polynomial
+##' @title polynomial
 ##' @param string an equation of the form cx^n+/-cx^n.., c
-##' @return an equation object representing the 
+##' @return an equation object representing the string
 ##' @author richie
 ##' @export
 polynomial <- function(string) {
@@ -197,6 +197,14 @@ operators <- function(polynomial) {
     ops <- polynomial@operators
 }
 
+##' A function to differentiate polynomial objects
+##'
+##' See above
+##' @title diff_polynomial
+##' @param polynomial 
+##' @return a function
+##' @author richie
+##' @export
 diff_polynomial <- function(polynomial) {
     ops <- polynomial@operators
     members <- polynomial@members

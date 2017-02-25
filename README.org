@@ -418,7 +418,7 @@ So, we have two major classes defined here. The first ~Expression~ represents a 
 
 Currently, ~Polynomials~ look like this. 
 
-#+BEGIN_SRC R :session  :results output
+#+BEGIN_SRC R :session  :results output :exports both
 print(getClass ("Polynomial"))
 
 #+END_SRC
@@ -449,9 +449,9 @@ setClass("Polynomial", representation = list(text="character", members="list", o
 ##' convert a string in polynomial form to an Equation object
 ##'
 ##' I really need to rename some of this stuff
-##' @title as_polynomial
+##' @title polynomial
 ##' @param string an equation of the form cx^n+/-cx^n.., c
-##' @return an equation object representing the 
+##' @return an equation object representing the string
 ##' @author richie
 ##' @export
 polynomial <- function(string) {
@@ -470,12 +470,25 @@ operators <- function(polynomial) {
 #+END_SRC
 
 #+BEGIN_SRC R :session :tangle polynomial/R/polynomial.R
-diff_polynomial <- function(polynomial) {
+##' A function to differentiate polynomial objects
+##'
+##' See above
+##' @title diff_polynomial
+##' @param polynomial 
+##' @return a function
+##' @author richie
+##' @export
+diff_polynomial <- function(polynomial, value) {
     ops <- polynomial@operators
     members <- polynomial@members
     diff_members <- lapply(members, differentiate)
     diffed_func <- lapply(diff_members, expression_to_function)
-
+    if(missing(value)) {
+        value <-  0
+    }
+    myenv <- new.env
+    myenv$x <- value
+    res <- lapply(diffed_func, function (x) {eval(x, envir=myenv)}(value))
 }
 #+END_SRC
 
@@ -501,6 +514,10 @@ combine_fns <- function(funcs, ops) {
     return(f)
 }
 #+END_SRC
+
+Combining functions is really hard.
+
+I'm pretty sure the whole thing above isn't going to work. However, given precedence rules, it actually doesn't need to, as all of the sums can be done on the *results* of the expressions, rather than on the expressions themselves. This means I'll need to keep around the operators along with the functions. 
 
 * Footnotes
 

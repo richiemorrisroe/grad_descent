@@ -2,6 +2,7 @@
 
 export(coef_expression)
 export(diff_expression)
+export(diff_polynomial)
 export(differentiate)
 export(exponent)
 export(exponent_expression)
